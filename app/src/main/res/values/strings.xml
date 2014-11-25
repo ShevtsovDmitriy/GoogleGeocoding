@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GoogleGeocode</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="InputTitle">Введите координаты или адрес</string>
+    <string name="Button_go_label">Отправить</string>
+    <string name="default_text">Amphitheatre Parkway, Mountain View, CA</string>
+
+</resources>

@@ -1,0 +1,38 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/text_view_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/InputTitle"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_info"
+        android:id="@+id/edit_text_coordinates"
+        android:inputType="textAutoComplete"
+        android:text="@string/default_text"/>
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:onClick="doSomething"
+        android:layout_below="@id/edit_text_coordinates"
+        android:id="@+id/button_start"
+        android:text="@string/Button_go_label"
+        />
+
+    <TextView
+        android:id="@+id/text_view_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_below="@id/button_start"/>
+
+</RelativeLayout>
