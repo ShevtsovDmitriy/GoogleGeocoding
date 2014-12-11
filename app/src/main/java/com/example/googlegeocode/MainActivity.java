@@ -6,14 +6,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+//import android.support.v4.app.FragmentManager;
+import android.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,12 +27,13 @@ public class MainActivity extends Activity {
 
     TextView info;
     EditText input;
+    private GoogleMapFragment googleMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        initMap();
         info = (TextView) findViewById(R.id.text_view_result);
         input = (EditText) findViewById(R.id.edit_text_coordinates);
     }
@@ -60,17 +61,23 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initMap() {
+        FragmentManager fm = getFragmentManager();
+        googleMapFragment = (GoogleMapFragment) fm.findFragmentByTag(GoogleMapFragment.TAG);
+        if (googleMapFragment == null) {
+            googleMapFragment = new GoogleMapFragment();
+            fm.beginTransaction().replace(R.id.map, googleMapFragment, GoogleMapFragment.TAG).commit();
+        }
+    }
+
     MyTask task;
 
     public void doSomething(View v){
         String str = input.getText().toString();
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ninfo = connectivityManager.getActiveNetworkInfo();
-        if (ninfo != null && ninfo.isConnected()){
-            System.out.print("\n Что-то происходит \n");
-        }
-        else {
-            System.out.print("\n Что-то не то происходит \n");
+        if (ninfo == null || !ninfo.isConnected()) {
+            System.out.print("\n Нет соединения \n");
         }
         task = new MyTask();
         task.execute(StringPreparer.makeString(str));
@@ -78,7 +85,7 @@ public class MainActivity extends Activity {
     }
 
 
-    class MyTask extends AsyncTask<String, Void, String> {
+    class MyTask extends AsyncTask<String, Void, CoordinatesObject> {
         public MyTask() {
             super();
         }
@@ -86,7 +93,7 @@ public class MainActivity extends Activity {
 
 
         @Override
-        protected String doInBackground(String... params) {
+        protected CoordinatesObject doInBackground(String... params) {
             try {
                 URL url = new URL(params[0]);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -95,41 +102,33 @@ public class MainActivity extends Activity {
                 connection.setRequestMethod("POST");
                 connection.setDoInput(true);
                 connection.connect();
-                int response = connection.getResponseCode();
                 InputStream is = connection.getInputStream();
                 Scanner scanner = new Scanner(is);
-                String str = "";
-                str = scanner.nextLine();
+                String str = scanner.nextLine();
                 while(scanner.hasNext()) {
                     str = str.concat(scanner.nextLine());
-
                 }
-                System.out.print("\n" + str + "\n");
-                JSONObject object = new JSONObject(str);
-                JSONArray results = object.optJSONArray("results");
-                JSONObject result = results.optJSONObject(0);
-                str = "Адрес: ";
-                str += result.optString("formatted_address");
-
+                //JSONObject object = new JSONObject(str);
+                //JSONArray results = new JSONObject(str).optJSONArray("results");
+                JSONObject result = new JSONObject(str).optJSONArray("results").optJSONObject(0);
+                String address = result.optString("formatted_address");
                 JSONObject location = result.optJSONObject("geometry").optJSONObject("location");
                 double lat = location.optDouble("lat");
                 double lng = location.optDouble("lng");
-                str += "\nКоординаты: ";
-                str += "\n" + lat + "\n" + lng;
-                return str;
+                return new CoordinatesObject(address, lat, lng);
             } catch (java.io.IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return "notWorking";
+            return new CoordinatesObject("not working", null, null);
         }
 
 
 
         @Override
-        protected void onPostExecute(String str) {
-            info.setText(str);
+        protected void onPostExecute(CoordinatesObject str) {
+            info.setText(str.toString());
 
         }
 
